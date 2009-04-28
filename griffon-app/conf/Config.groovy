@@ -69,7 +69,7 @@ environments {
 
 griffon {
     app {
-        javaOps = ["-Djava.library.path=${basedir}/lib/native"]
+        javaOpts = ["-Djava.library.path=${basedir}/lib/native"]
     }
     memory {
         //max = '64m'
