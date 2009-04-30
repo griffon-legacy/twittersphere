@@ -1,63 +1,67 @@
-import java.awt.Color
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas
-import gov.nasa.worldwind.layers.WorldMapLayer
-import gov.nasa.worldwind.examples.ClickAndGoSelectListener
-import gov.nasa.worldwind.examples.LayerPanel
-import java.awt.BorderLayout
-import gov.nasa.worldwind.event.SelectListener
-import java.awt.image.BufferedImage
-import gov.nasa.worldwind.geom.Position
-import java.awt.Image
-import gov.nasa.worldwind.render.GlobeAnnotation
+import gov.nasa.worldwind.examples.ApplicationTemplate
+import gov.nasa.worldwind.layers.*
+import gov.nasa.worldwind.layers.Mercator.examples.OSMMapnikLayer
+import gov.nasa.worldwind.layers.Earth.*
 import gov.nasa.worldwind.render.Annotation
-import gov.nasa.worldwind.layers.RenderableLayer
-import gov.nasa.worldwind.layers.AnnotationLayer
+import gov.nasa.worldwind.render.GlobeAnnotation
 
-application(title:'twittersphere',  pack:true, locationByPlatform:true) {
+import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.image.BufferedImage
+import java.awt.Image
 
-    wwd = widget(new WorldWindowGLCanvas(), preferredSize: [500, 500],
-        model: model.worldWindModel, constraints: BorderLayout.CENTER,
-        selected: controller.mapSelection 
+application(title:'twittersphere',  
+  pack:true, locationByPlatform:true,
+  iconImage: imageIcon('/griffon-icon-48x48.png').image,
+  iconImages: [imageIcon('/griffon-icon-48x48.png').image,
+               imageIcon('/griffon-icon-32x32.png').image,
+               imageIcon('/griffon-icon-16x16.png').image]
+) {
+  hbox(border:emptyBorder(6), constraints:BorderLayout.NORTH) {
+    comboBox(items:["Search", "Timeline", "Following", "Followers", "Public"],
+        selectedItem: bind(target:model, 'searchMode'),
+        lightWeightPopupEnabled:false
     )
-    println 'hi'
-    wwd.addSelectListener (controller.mapSelection as SelectListener)
-    wwd.inputHandler.mouseClicked = { evt ->
-        println evt
-        icon = imageIcon('/griffon-icon-48x48.png')
-        addTweet(Position.fromDegrees(38.9666, -104.7227, 0), "Tweet!", icon.image);
-    }
-    //wwd.addSelectListener(new ClickAndGoSelectListener(wwd, WorldMapLayer.class));
-
-    layerPanel = widget(new LayerPanel(wwd, null), constraints:BorderLayout.WEST)
-
+    hstrut(6)
+    textField("#JavaOne", text:bind(target:model, 'searchText'))
+    hstrut(6)
+    button("Search", actionPerformed: controller.search)
+  }
+  wwd = widget(new WorldWindowGLCanvas(), preferredSize: [700, 500],
+    model: model.worldWindModel, constraints: BorderLayout.CENTER,
+    selected: controller.mapSelection
+  )
 }
 
-annotationLayer = new AnnotationLayer()
-wwd.model.layers.add(0, annotationLayer)
+LayerList ll = wwd.model.layers
+ll.remove(ll.getLayerByName('Place Names'))
+ApplicationTemplate.insertBeforeCompass(wwd, new OpenStreetMapLayer())
+ApplicationTemplate.insertBeforeCompass(wwd, annotationLayer = new AnnotationLayer())
 
-inset = 10; // pixels
-def addTweet(Position position, String tweet, Image tweetImage) {
+inset = 10 // pixels
+def addTweet(pos, tweet, tweetImage) {
+  // we need transparency, copy the image to enforce that
+  int width = tweetImage.width
+  int height = tweetImage.height
+  def image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+  image.graphics.drawImage(tweetImage, 0, 0, null)
 
-    def image = new BufferedImage(tweetImage.width, tweetImage.height, BufferedImage.TYPE_INT_ARGB)
-    image.getGraphics().drawImage(tweetImage, 0, 0, null)
-    int width = image.width
-    int height = image.height
-    // Check for alpha channel in image
-    // Create annotation
+  // Create annotation
+  GlobeAnnotation ga = new GlobeAnnotation(tweet, pos)
+  bean(ga.attributes,
+    insets: [inset, height + inset * 2, inset, inset],
+    imageSource: image,
+    imageOffset: [inset, inset],
+    imageRepeat: Annotation.IMAGE_REPEAT_NONE,
+    imageOpacity: 1,
+    size: [width + inset * 2 + 200, 68],
+    adjustWidthToText : Annotation.SIZE_FIT_TEXT,
+    backgroundColor : Color.WHITE,
+    textColor: Color.BLACK,
+    borderColor: Color.BLACK)
 
-    def text = tweet
-    GlobeAnnotation ga = new GlobeAnnotation(text, position)
-    bean(ga.attributes,
-        insets: [inset, height + inset * 2, inset, inset],
-        imageSource: image,
-        imageOffset: [inset, inset],
-        imageRepeat: Annotation.IMAGE_REPEAT_NONE,
-        imageOpacity: 1,
-        size: [width + inset * 2 + 200, 68],
-        adjustWidthToText : Annotation.SIZE_FIT_TEXT,
-        backgroundColor : Color.WHITE,
-        textColor: Color.BLACK,
-        borderColor: Color.BLACK)
-
-    annotationLayer.addAnnotation(ga)
+  //add it to the layer
+  annotationLayer.addAnnotation(ga)
+  return ga
 }

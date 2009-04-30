@@ -15,23 +15,30 @@ class TwittersphereController {
     }
 
     def mapSelection = { SelectEvent event ->
-        println "Try!"
         if ((event.eventAction == SelectEvent.LEFT_CLICK)
-            && (event.topPickedObject?.hasPosition)
-            && (model.wwd.view instanceof OrbitView))
+            && (event.topPickedObject?.hasPosition())
+            && (view.wwd.view instanceof OrbitView))
         {
-            OrbitView orbitView = model.wwd.view
-            Globe globe = model.wwd.model.globe;
+            OrbitView orbitView = view.wwd.view
+            Globe globe = view.wwd.model.globe
             if (globe != null && orbitView != null) {
-                println "Success!"
                 Position targetPos = event.topPickedObject.position
                 // Use a PanToIterator to iterate view to target position
                 orbitView.applyStateIterator(FlyToOrbitViewStateIterator.createPanToIterator(
                     // The elevation component of 'targetPos' here is not the surface elevation,
                     // so we ignore it when specifying the view center position.
-                    view, globe, new Position(targetPos, 0),
-                    Angle.ZERO, Angle.ZERO, targetPos.getElevation() + this.elevationOffset));
+                    orbitView, globe, new Position(targetPos, 0),
+                    Angle.ZERO, Angle.ZERO, targetPos.elevation))
             }
         }
+    }
+
+    def search = {
+        def pos = Position.fromDegrees(38.9666, -104.7227, 0)
+        view.addTweet(pos, "Tweet!", view.imageIcon('/griffon-icon-48x48.png').image)
+        OrbitView orbitView = view.wwd.view
+        orbitView.applyStateIterator(FlyToOrbitViewStateIterator.createPanToIterator(
+            orbitView, view.wwd.model.globe, pos,
+            Angle.ZERO, Angle.ZERO, 1000000))
     }
 }
