@@ -10,6 +10,8 @@ import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.awt.Image
+import java.awt.event.ActionListener
+import javax.swing.Timer
 
 application(title:'twittersphere',  
   pack:true, locationByPlatform:true,
@@ -18,44 +20,47 @@ application(title:'twittersphere',
                imageIcon('/griffon-icon-32x32.png').image,
                imageIcon('/griffon-icon-16x16.png').image]
 ) {
+
   hbox(border:emptyBorder(6), constraints:BorderLayout.NORTH) {
-    comboBox(items:["Search", "Timeline", "Following", "Followers", "Public"],
-        selectedItem: bind(target:model, 'searchMode'),
-        lightWeightPopupEnabled:false
+
+    comboBox(items:["Search", "Following", "Followers", "Public"],
+      selectedItem: bind(target:model, 'searchMode'),
+      lightWeightPopupEnabled:false,
+      enabled:bind {!model.searching}
     )
     hstrut(6)
-    textField("#JavaOne", text:bind(target:model, 'searchText'))
+    textField("#JavaOne", text:bind(target:model, 'searchText'), enabled:bind {!model.searching})
     hstrut(6)
-    button("Search", actionPerformed: controller.search)
+    button("Search", actionPerformed: controller.search, enabled:bind {!model.searching})
   }
+
   wwd = widget(new WorldWindowGLCanvas(), preferredSize: [700, 500],
-    model: model.worldWindModel, constraints: BorderLayout.CENTER,
-    selected: controller.mapSelection
+    model: model.worldWindModel, 
+    constraints: BorderLayout.CENTER
   )
 }
 
+// remove place names, add open street mal labels
 LayerList ll = wwd.model.layers
 ll.remove(ll.getLayerByName('Place Names'))
 ApplicationTemplate.insertBeforeCompass(wwd, new OpenStreetMapLayer())
 ApplicationTemplate.insertBeforeCompass(wwd, annotationLayer = new AnnotationLayer())
 
 inset = 10 // pixels
-def addTweet(pos, tweet, tweetImage) {
+def addTweet(pos, user, tweet, tweetImage) {
   // we need transparency, copy the image to enforce that
-  int width = tweetImage.width
-  int height = tweetImage.height
-  def image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
-  image.graphics.drawImage(tweetImage, 0, 0, null)
+  def image = new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB)
+  image.graphics.drawImage(tweetImage, 0, 0, 48, 48, null)
 
   // Create annotation
-  GlobeAnnotation ga = new GlobeAnnotation(tweet, pos)
+  GlobeAnnotation ga = new GlobeAnnotation("<a href='x'>$user</a><br>$tweet", pos)
   bean(ga.attributes,
-    insets: [inset, height + inset * 2, inset, inset],
+    insets: [inset, 48 + inset * 2, inset, inset],
     imageSource: image,
     imageOffset: [inset, inset],
     imageRepeat: Annotation.IMAGE_REPEAT_NONE,
     imageOpacity: 1,
-    size: [width + inset * 2 + 200, 68],
+    size: [inset * 2 + 298, 0],
     adjustWidthToText : Annotation.SIZE_FIT_TEXT,
     backgroundColor : Color.WHITE,
     textColor: Color.BLACK,
@@ -65,3 +70,6 @@ def addTweet(pos, tweet, tweetImage) {
   annotationLayer.addAnnotation(ga)
   return ga
 }
+
+tweetListAnimator = new Timer(0, controller.nextTweet as ActionListener)
+tweetListAnimator.setDelay(15000)
