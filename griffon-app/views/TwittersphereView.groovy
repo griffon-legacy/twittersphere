@@ -21,23 +21,48 @@ application(title:'twittersphere',
                imageIcon('/griffon-icon-16x16.png').image]
 ) {
 
-  hbox(border:emptyBorder(6), constraints:BorderLayout.NORTH) {
+  wwd = widget(new WorldWindowGLCanvas(), preferredSize: [700, 500],
+    model: model.worldWindModel, 
+    constraints: BorderLayout.CENTER
+  )
 
-    comboBox(items:["Search", "Following", "Followers", "Public"],
+  hbox(border:emptyBorder(6), constraints:BorderLayout.SOUTH) {
+    
+    checkBox("Animated", selected:bind(target:model, 'animate', value:true))
+    hstrut(6)
+
+    comboBox(items:["Search", /*"Following", "Followers", */ "Public"],
       selectedItem: bind(target:model, 'searchMode'),
       lightWeightPopupEnabled:false,
       enabled:bind {!model.searching}
     )
     hstrut(6)
-    textField("#JavaOne", text:bind(target:model, 'searchText'), enabled:bind {!model.searching})
+
+    label("Results:", enabled: bind {model.searchMode != 'Public'})
+    resCount = slider(minimum: 20, maximum:200, preferredSize:[75,16],
+        value:bind(id:'bnd', target:model, 'searchLimit', value:20),
+        enabled: bind {model.searchMode != 'Public'})
+    hstrut(2)
+    label(text: bind {resCount.value})
     hstrut(6)
-    button("Search", actionPerformed: controller.search, enabled:bind {!model.searching})
+
+    textField("#JavaOne",
+      text:bind(target:model, 'searchText'),
+      enabled:bind {!model.searching & model.searchMode != 'Public'}
+    )
+    hstrut(6)
+
+    button("Search",
+      actionPerformed: controller.search,
+      enabled:bind {!model.searching}
+    )
+    hstrut(6)
+
+    progressBar(maximum: bind { model.tweetList?.size() ?: 1 }, 
+      value: bind {model.tweetListPos}
+    )
   }
 
-  wwd = widget(new WorldWindowGLCanvas(), preferredSize: [700, 500],
-    model: model.worldWindModel, 
-    constraints: BorderLayout.CENTER
-  )
 }
 
 // remove place names, add open street mal labels
@@ -73,3 +98,5 @@ def addTweet(pos, user, tweet, tweetImage) {
 
 tweetListAnimator = new Timer(0, controller.nextTweet as ActionListener)
 tweetListAnimator.setDelay(15000)
+println bnd
+bnd.rebind()

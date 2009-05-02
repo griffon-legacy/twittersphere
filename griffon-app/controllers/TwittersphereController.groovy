@@ -71,7 +71,7 @@ class TwittersphereController {
 
     def getSearchResults(search) {
         List results = []
-        def doc = slurpAPIStream("http://search.twitter.com/search.atom?q=${URLEncoder.encode(search)}")
+        def doc = slurpAPIStream("http://search.twitter.com/search.atom?q=${URLEncoder.encode(search)}&rpp=${model.searchLimit}")
         doc.entry.each {
             results << [
                 icon: it.link[1]["@href"] as String,
@@ -110,17 +110,20 @@ class TwittersphereController {
                 if (tweet.pos) {
                     edt {
                         view.addTweet(tweet.pos, tweet.user, tweet.tweet, tweet.icon)
-                        OrbitView orbitView = view.wwd.view
-                        orbitView.applyStateIterator(FlyToOrbitViewStateIterator.createPanToIterator(
-                            orbitView, view.wwd.model.globe, tweet.pos,
-                            Angle.ZERO, Angle.ZERO, 1000000))
+                        if (model.animate) {
+                            OrbitView orbitView = view.wwd.view
+                            orbitView.applyStateIterator(FlyToOrbitViewStateIterator.createPanToIterator(
+                                orbitView, view.wwd.model.globe, tweet.pos,
+                                Angle.ZERO, Angle.ZERO, 1000000))
+                        } else {
+                            doLater nextTweet
+                        }
                     }
                 } else {
                     edt nextTweet
                 }
             }
         } else {
-            println "Done with list"
             view.tweetListAnimator.stop();
         }
 

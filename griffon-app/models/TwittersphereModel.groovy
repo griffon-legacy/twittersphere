@@ -4,15 +4,17 @@ import gov.nasa.worldwind.WorldWind
 import gov.nasa.worldwind.avlist.AVKey
 import gov.nasa.worldwind.render.Annotation
 
-class TwittersphereModel {
+@Bindable class TwittersphereModel {
   Model worldWindModel = WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME)
 
-  @Bindable String searchMode
-  @Bindable String searchText
+  boolean animate
+  String searchMode
+  String searchText
+  int searchLimit
 
-  @Bindable boolean searching
-  @Bindable List tweetList
-  @Bindable int tweetListPos
+  boolean searching
+  List tweetList
+  int tweetListPos
 
   @Bindable Map<String, Annotation> tweetAnnotaitons
 
