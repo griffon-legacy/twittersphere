@@ -46,8 +46,9 @@ application(title:'twittersphere',
     label(text: bind {resCount.value})
     hstrut(6)
 
-    textField("#JavaOne",
-      text:bind(target:model, 'searchText'),
+    comboBox(id:'searchBox', model:model.searchModel,
+      selectedItem: bind(target:model, 'searchText'),
+      lightWeightPopupEnabled:false, editable:true,
       enabled:bind {!model.searching & model.searchMode != 'Public'}
     )
     hstrut(6)

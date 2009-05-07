@@ -8,6 +8,8 @@ import groovy.util.slurpersupport.GPathResult
 import java.beans.PropertyChangeListener
 import java.net.URL
 import java.net.URLEncoder
+import net.yajjl.JsonParser
+import net.yajjl.JsonParser.*
 
 class TwittersphereController {
 
@@ -16,6 +18,8 @@ class TwittersphereController {
 
 
     void mvcGroupInit(Map args) {
+    	model.searchTermsList.add("#JavaOne")
+		model.searchTermsList.addAll(getTrends())
         model.addPropertyChangeListener('tweetList',
             { view.tweetListAnimator.restart()} as PropertyChangeListener)
     }
@@ -132,6 +136,19 @@ class TwittersphereController {
     def prevTweet = {
         
     }
+	
+	def getTrends = {
+		try {
+			def parser = new JsonParser()
+			def jsonText = new URL("http://search.twitter.com/trends.json").openStream().text
+			def obj = parser.parseObject(jsonText)
+			def trendNames = obj.trends.collect{it.name}
+			return trendNames[0..4]
+		} catch(Exception e) {
+			System.err.println text
+            throw e
+		}
+	}
 
     XmlSlurper slurper = new XmlSlurper()
     GPathResult slurpAPIStream(String url) {
