@@ -98,5 +98,4 @@ def addTweet(pos, user, tweet, tweetImage) {
 
 tweetListAnimator = new Timer(0, controller.nextTweet as ActionListener)
 tweetListAnimator.setDelay(15000)
-println bnd
-bnd.rebind()
+
