@@ -1,0 +1,8 @@
+*.java java
+*.groovy crlf
+*.jnlp xml
+*.bat -crlf
+*.html html
+*.properties crlf
+*.conf crlf
+.git* crlf

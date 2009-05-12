@@ -1,0 +1,11 @@
+*staging/
+*nbproject/
+nb-build.xml
+*dist/
+*target/
+*.settings/
+Thumbs.db
+stacktrace.log
+*.ipr
+*.iws
+*.iml
