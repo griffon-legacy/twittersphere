@@ -94,6 +94,17 @@ def addTweet(pos, user, tweet, tweetImage) {
 
   //add it to the layer
   annotationLayer.addAnnotation(ga)
+  
+  //only show the last X number of annotations
+  //the multi-step process is needed because
+  //getAnnotations returns an unmodifiable collection
+  if (annotationLayer.getAnnotations().size() > 10) {
+  	def list = annotationLayer.getAnnotations()
+	def array = list.toArray()
+	annotationLayer.removeAnnotation(array[0])
+  
+  }
+
   return ga
 }
 
