@@ -36,6 +36,12 @@ class TwittersphereController {
                         newTweets = getPublicResults()
                         break
                     case 'Search' :
+						if (text == null || text.trim().equals("")) {
+							edt {
+								view.searchBox.setSelectedItem("Enter a search term")
+							}
+							return 
+						}
                         newTweets = getSearchResults(text)
                         break
 
