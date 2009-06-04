@@ -46,8 +46,9 @@ application(title:'twittersphere',
     label(text: bind {resCount.value})
     hstrut(6)
 
-    textField("#JavaOne",
-      text:bind(target:model, 'searchText'),
+    comboBox(id:'searchBox', model:model.searchModel,
+      selectedItem: bind(target:model, 'searchText'),
+      lightWeightPopupEnabled:false, editable:true,
       enabled:bind {!model.searching & model.searchMode != 'Public'}
     )
     hstrut(6)
@@ -93,6 +94,17 @@ def addTweet(pos, user, tweet, tweetImage) {
 
   //add it to the layer
   annotationLayer.addAnnotation(ga)
+  
+  //only show the last X number of annotations
+  //the multi-step process is needed because
+  //getAnnotations returns an unmodifiable collection
+  if (annotationLayer.getAnnotations().size() > 10) {
+  	def list = annotationLayer.getAnnotations()
+	def array = list.toArray()
+	annotationLayer.removeAnnotation(array[0])
+  
+  }
+
   return ga
 }
 
