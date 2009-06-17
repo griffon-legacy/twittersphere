@@ -18,10 +18,13 @@ class TwittersphereController {
 
 
     void mvcGroupInit(Map args) {
-    	model.searchTermsList.add("#JavaOne")
-		model.searchTermsList.addAll(getTrends())
-        model.addPropertyChangeListener('tweetList',
-            { view.tweetListAnimator.restart()} as PropertyChangeListener)
+        def trends = getTrends()
+        edt {
+            model.searchTermsList.add("#JavaOne")
+            model.searchTermsList.addAll(trends)
+            model.addPropertyChangeListener('tweetList',
+                { view.tweetListAnimator.restart()} as PropertyChangeListener)
+        }
     }
 
     def search = {
@@ -36,12 +39,12 @@ class TwittersphereController {
                         newTweets = getPublicResults()
                         break
                     case 'Search' :
-						if (text == null || text.trim().equals("")) {
-							edt {
-								view.searchBox.setSelectedItem("Enter a search term")
-							}
-							return 
-						}
+                        if (text == null || text.trim().equals("")) {
+                            edt {
+                                view.searchBox.setSelectedItem("Enter a search term")
+                            }
+                            return 
+                        }
                         newTweets = getSearchResults(text)
                         break
 
@@ -142,19 +145,19 @@ class TwittersphereController {
     def prevTweet = {
         
     }
-	
-	def getTrends = {
-		try {
-			def parser = new JsonParser()
-			def jsonText = new URL("http://search.twitter.com/trends.json").openStream().text
-			def obj = parser.parseObject(jsonText)
-			def trendNames = obj.trends.collect{it.name}
-			return trendNames[0..4]
-		} catch(Exception e) {
-			System.err.println text
+    
+    def getTrends = {
+        try {
+            def parser = new JsonParser()
+            def jsonText = new URL("http://search.twitter.com/trends.json").openStream().text
+            def obj = parser.parseObject(jsonText)
+            def trendNames = obj.trends.collect{it.name}
+            return trendNames[0..4]
+        } catch(Exception e) {
+            System.err.println text
             throw e
-		}
-	}
+        }
+    }
 
     XmlSlurper slurper = new XmlSlurper()
     GPathResult slurpAPIStream(String url) {
