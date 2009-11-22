@@ -1,4 +1,3 @@
-import gov.nasa.worldwind.event.SelectEvent
 import gov.nasa.worldwind.geom.Position
 import gov.nasa.worldwind.geom.Angle
 import gov.nasa.worldwind.globes.Globe
@@ -43,7 +42,7 @@ class TwittersphereController {
                             edt {
                                 view.searchBox.setSelectedItem("Enter a search term")
                             }
-                            return 
+                            return
                         }
                         newTweets = getSearchResults(text)
                         break
@@ -98,14 +97,17 @@ class TwittersphereController {
     def addLocations(List<Map> tweets) {
         tweets.each this.&addLocation
     }
-    
+
     def addLocation(def tweet) {
         try {
-            def tvr = slurpAPIStream("http://twittervision.com/user/current_status/${tweet.user}.xml")
-            tweet.pos = Position.fromDegrees(
-                Float.parseFloat(tvr.location.latitude as String),
-                Float.parseFloat(tvr.location.longitude as String),
-                0);
+            def twitterUser = slurpAPIStream("http://twitter.com/users/show.xml?screen_name=$tweet.user")
+            def gnm = slurpAPIStream("http://ws.geonames.org/search?maxRows=1&q=${URLEncoder.encode(twitterUser.location as String)}")
+            if (gnm.geoname.size()) {
+                tweet.pos = Position.fromDegrees(
+                    Float.parseFloat(gnm.geoname[0].lat as String),
+                    Float.parseFloat(gnm.geoname[0].lng as String),
+                    0);
+            }
         } catch (Exception ignore) {}
     }
 
@@ -118,7 +120,7 @@ class TwittersphereController {
                 }
                 if (tweet.icon instanceof String) {
                     tweet.icon = view.imageIcon(url:new URL(tweet.icon)).image
-                    
+
                 }
                 if (tweet.pos) {
                     edt {
@@ -143,9 +145,9 @@ class TwittersphereController {
     }
 
     def prevTweet = {
-        
+
     }
-    
+
     def getTrends = {
         try {
             def parser = new JsonParser()
