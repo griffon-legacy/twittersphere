@@ -1,3 +1,5 @@
+package twittersphere
+
 import groovy.beans.Bindable
 import gov.nasa.worldwind.Model
 import gov.nasa.worldwind.WorldWind

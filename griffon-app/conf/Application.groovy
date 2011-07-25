@@ -5,8 +5,8 @@ application {
 }
 mvcGroups {
 	twittersphere {
-		model="TwittersphereModel"
-		view="TwittersphereView"
-		controller="TwittersphereController"
+		model="twittersphere.TwittersphereModel"
+		controller="twittersphere.TwittersphereController"
+		view="twittersphere.TwittersphereView"
 	}
 }

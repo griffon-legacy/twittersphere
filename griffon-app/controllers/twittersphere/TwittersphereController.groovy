@@ -1,3 +1,5 @@
+package twittersphere
+
 import gov.nasa.worldwind.geom.Position
 import gov.nasa.worldwind.geom.Angle
 import gov.nasa.worldwind.globes.Globe
@@ -17,10 +19,14 @@ class TwittersphereController {
 
 
     void mvcGroupInit(Map args) {
-        def trends = getTrends()
+		}
+		def onStartupEnd = {
+        //def trends = getTrends()
+				//println trends
         edt {
             model.searchTermsList.add("#JavaOne")
-            model.searchTermsList.addAll(trends)
+						getTrends()
+            //model.searchTermsList.addAll(trends)
             model.addPropertyChangeListener('tweetList',
                 { view.tweetListAnimator.restart()} as PropertyChangeListener)
         }
@@ -147,16 +153,20 @@ class TwittersphereController {
     def prevTweet = {
 
     }
-
+		//
+		//see http://groups.google.com/group/twitter-api-announce/browse_thread/thread/bec060db85d8cf72
+		//
     def getTrends = {
+				def jsonText
         try {
             def parser = new JsonParser()
-            def jsonText = new URL("http://search.twitter.com/trends.json").openStream().text
+            jsonText = new URL("http://api.twitter.com/1/trends.json").openStream().text
             def obj = parser.parseObject(jsonText)
             def trendNames = obj.trends.collect{it.name}
-            return trendNames[0..4]
+            //return trendNames[0..4]
+						model.searchTermsList.addAll(trendNames[0..4])
         } catch(Exception e) {
-            System.err.println text
+            System.err.println jsonText
             throw e
         }
     }
