@@ -1,3 +1,5 @@
+package twittersphere
+
 import groovy.beans.Bindable
 import gov.nasa.worldwind.Model
 import gov.nasa.worldwind.WorldWind
@@ -23,4 +25,8 @@ import ca.odell.glazedlists.swing.EventComboBoxModel
   @Bindable Map<String, Annotation> tweetAnnotaitons
   EventList<String> searchTermsList = new BasicEventList<String>()
   EventComboBoxModel<String> searchModel = new EventComboBoxModel<String>(searchTermsList)
+
+  //kimukou_26 20110725-temporary add start
+  groovy.util.slurpersupport.GPathResult result
+  //kimukou_26 20110725-temporary add end
 }

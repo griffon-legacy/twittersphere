@@ -1,3 +1,5 @@
+package twittersphere
+
 import gov.nasa.worldwind.geom.Position
 import gov.nasa.worldwind.geom.Angle
 import gov.nasa.worldwind.globes.Globe
@@ -17,10 +19,14 @@ class TwittersphereController {
 
 
     void mvcGroupInit(Map args) {
-        def trends = getTrends()
+    }
+    def onStartupEnd = {
+        //def trends = getTrends()
+        //println trends
         edt {
             model.searchTermsList.add("#JavaOne")
-            model.searchTermsList.addAll(trends)
+            getTrends()
+            //model.searchTermsList.addAll(trends)
             model.addPropertyChangeListener('tweetList',
                 { view.tweetListAnimator.restart()} as PropertyChangeListener)
         }
@@ -71,6 +77,7 @@ class TwittersphereController {
     def getPublicResults() {
         List results = []
         def doc = slurpAPIStream("http://twitter.com/statuses/public_timeline.xml")
+        doc=model.result //temporary add 
         doc.status.each {
             results << [
                 icon: it.user.profile_image_url as String,
@@ -83,7 +90,11 @@ class TwittersphereController {
 
     def getSearchResults(search) {
         List results = []
-        def doc = slurpAPIStream("http://search.twitter.com/search.atom?q=${URLEncoder.encode(search)}&rpp=${model.searchLimit}")
+        def url = "http://search.twitter.com/search.atom?q=${URLEncoder.encode(search)}&rpp=${model.searchLimit}"
+        //println "url="+url
+        def doc = slurpAPIStream(url)
+        doc=model.result //temporary add 
+        //println "doc="+doc?.dump()
         doc.entry.each {
             results << [
                 icon: it.link[1]["@href"] as String,
@@ -101,7 +112,9 @@ class TwittersphereController {
     def addLocation(def tweet) {
         try {
             def twitterUser = slurpAPIStream("http://twitter.com/users/show.xml?screen_name=$tweet.user")
+            twitterUser=model.result //temporary add 
             def gnm = slurpAPIStream("http://ws.geonames.org/search?maxRows=1&q=${URLEncoder.encode(twitterUser.location as String)}")
+            gnm=model.result //temporary add 
             if (gnm.geoname.size()) {
                 tweet.pos = Position.fromDegrees(
                     Float.parseFloat(gnm.geoname[0].lat as String),
@@ -147,16 +160,20 @@ class TwittersphereController {
     def prevTweet = {
 
     }
-
+    //
+    //see http://groups.google.com/group/twitter-api-announce/browse_thread/thread/bec060db85d8cf72
+    //
     def getTrends = {
+        def jsonText
         try {
             def parser = new JsonParser()
-            def jsonText = new URL("http://search.twitter.com/trends.json").openStream().text
+            jsonText = new URL("http://api.twitter.com/1/trends.json").openStream().text
             def obj = parser.parseObject(jsonText)
             def trendNames = obj.trends.collect{it.name}
-            return trendNames[0..4]
+            //return trendNames[0..4]
+            model.searchTermsList.addAll(trendNames[0..4])
         } catch(Exception e) {
-            System.err.println text
+            System.err.println jsonText
             throw e
         }
     }
@@ -166,8 +183,12 @@ class TwittersphereController {
         def text = ""
         try {
             text = new URL(url).openStream().text
+            //println "text="+text.dump()
             synchronized (slurper) {
-                return slurper.parse(new StringReader(text))
+                def result=slurper.parse(new StringReader(text))
+                //println "result="+result.dump()
+                model.result = result
+                return result
             }
         } catch (Exception e) {
             System.err.println text

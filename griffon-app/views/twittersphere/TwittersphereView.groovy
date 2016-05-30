@@ -1,3 +1,5 @@
+package twittersphere
+
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas
 import gov.nasa.worldwind.examples.ApplicationTemplate
 import gov.nasa.worldwind.layers.*
@@ -14,7 +16,11 @@ import java.awt.event.ActionListener
 import javax.swing.Timer
 
 application(title:'twittersphere',  
-  pack:true, locationByPlatform:true,
+	size: [700,500],
+  //pack: true,
+  //location: [50,50],
+  pack:true, 
+	locationByPlatform:true,
   iconImage: imageIcon('/griffon-icon-48x48.png').image,
   iconImages: [imageIcon('/griffon-icon-48x48.png').image,
                imageIcon('/griffon-icon-32x32.png').image,
